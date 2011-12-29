@@ -38,7 +38,7 @@ Put the plugin in plugins folder inder the same name as **plugin_name.js** & exe
 
 Roadmap
 ---------------
-* Integrate with Node.js for paraller scraping
+* Integrate with Node.js for parallel scraping
 * Database layer for saving the information
 * MD5 cache check for already scraped resources
 * Integrating Brain.JS
