@@ -1,6 +1,12 @@
 Alex Kolarski's Web Scraper with JS & jQuery
 ===============================================
 
+Description
+---------
+Web HTML scraper all written in JavaScript! jQuery have the best DOM tree manipulation engine. Period. That's why implementing scraper with jQuery is really easy & fast. Together with all recent speed improvements in JavaScript and Node.JS it's really a cutting egde technology. 
+
+
+Advantages
 ----------------------------------------
 
 * Moduler architecture - every task is acheved by plug-in architecture
