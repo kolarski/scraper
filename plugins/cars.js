@@ -6,14 +6,15 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 		rub:1,
 		topmenu:1,
 		marka: 'Honda',
-		model: 'Civic',
+		//model: 'Civic',
 		//price1:,
 		//year: 2003,
 		//engine_t:'бензинов',
 		//transmis:'%D0%FA%F7%ED%E0',
 		//location:'',
 		f1: 1,
-		nup:0,
+		//nup:0, // нови
+		nup:23, // на части
 	},
 	el: 'body',
 	cars_data: [],
