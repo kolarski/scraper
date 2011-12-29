@@ -36,6 +36,14 @@ var plugins = $.extend(crower.plugins, {'plugin_name' : { // plugin_name is the 
 ```
 Put the plugin in plugins folder inder the same name as **plugin_name.js** & execute with **index.php?plugin=plugin_name**
 
+Roadmap
+---------------
+* Integrate with Node.js for paraller scraping
+* Database layer for saving the information
+* MD5 cache check for already scraped resources
+* Integrating Brain.JS
+
+
 --------
 For more information feel free to contact me: 
 aleks.rk@gmail.com
