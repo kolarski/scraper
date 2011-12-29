@@ -20,6 +20,7 @@ Dependency
 -----------------
 * Highcharts JS v2.1.9 (included)
 * jQuery (included)
+* PHP - Using PHP as AJAX proxy regarding "Cross domain origin policy"
 
 
 Simple usage
