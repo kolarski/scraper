@@ -5,8 +5,8 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 		act:3,
 		rub:1,
 		topmenu:1,
-		marka: 'Honda',
-		model: 'Civic',
+		marka: 'Renault',
+		model: 'Kangoo',
 		//price1:,
 		//year: 1997,
 		//engine_t:'бензинов',
@@ -26,14 +26,12 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 		// calculate the pages
 		var pages_array = $(html).find('.pageNumbersInfo').text().split(' '),car_money_type;
 		plugins.cars.maxPages = pages_array[pages_array.length-1];
-		plugins.cars.maxPages = 2;
 		$(html).find('table[width=660]').each(function() {
 			var desc = $(this).find('tbody td[width=510]').html(),
 				car_title = $(this).find('.mmm').text(),
-				price = $(this).find('.price').text();
-			
+				price = $(this).find('.price').text(),
+				link_pic = $(this).find('tr').eq(2).find('td a');
 			if (desc === null || car_title === null || price === null) return;
-			
 			// manif data
 			car_data = desc.split('<br><br>')[0].split(',');
 			manifacture_date = car_data[0].substring(31).split(' ');
@@ -64,6 +62,13 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 			} else {
 				car_money_type = 'leva';
 			}
+			link = $(link_pic).attr('href');
+			pic = $(link_pic).find('img').attr('src');
+			//default no-picture
+			if (pic == "http://www.mobile.bg/images/picturess/photo_med1.gif") {
+				pic = '';
+			}
+			console.log(pic);
 			var data = {
 				month: manifacture_date[0],
 				year: parseInt(manifacture_date[1], 10),
@@ -74,8 +79,11 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				short_desc: car_desc,
 				price: parseInt(car_price, 10),
 				price_currency: car_money_type,
-				scrape_time:  parseInt(new Date().getTime() / 1000, 10)
+				scrape_time:  parseInt(new Date().getTime() / 1000, 10),
+				link_pic:  link,
+				pic: pic
 			}
+			//console.log($(link_pic).html());
 			plugins.cars.cars_data.push(data);
 		});
 		if(plugins.cars.postVars.f1 <= plugins.cars.maxPages) {
@@ -93,11 +101,10 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 			$('#cars_container').html('<div>Cars fetched: ' + plugins.cars.chart_data.length + '<br />Pages scraped: ' + plugins.cars.maxPages  + '<br />Average car price: ' + (plugins.cars.total_price/plugins.cars.chart_data.length).toFixed(2) +'<br />Fucking amazing average: ' + plugins.cars.total.toFixed(2) +'</div>')
 			
 		}
-		console.log(plugins.cars.chart_data);
 	},
 	processChartData: function() {
 		var key = '';
-		
+		// console.log(plugins.cars.cars_data);
 		_.each(plugins.cars.cars_data, function(car, i) {
 			tolerance = 2500;
 			if (car.price_currency !== 'leva') {
@@ -111,7 +118,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				} else {
 					plugins.cars.probability[key] += 1;
 				}
-				plugins.cars.chart_data.push([car.price, car.year]);
+				plugins.cars.chart_data.push([car.year, car.price, car.link_pic, car.pic]);
 			}			
 		});
 		
@@ -138,7 +145,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				title: {
 					enabled: true,
 					// text: 'Година на производство'
-					text: 'Цена (лв.)'
+					text: 'Година'
 				},
 				startOnTick: true,
 				endOnTick: true,
@@ -147,14 +154,14 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 			yAxis: {
 				title: {
 					// text: 'Цена (лв.)'
-					text: 'Година на производство'
+					text: 'Цена (лв.)'
 				}
 			},
 			tooltip: {
+				useHTML: true,
 				formatter: function() {
-						return 'Производство '+
-						// this.x +' г. с цена , '+ this.y +' лв.';
-						this.y +' г. с цена , '+ this.x +' лв.';
+						console.log(this['point']['config']);
+						return '<a target="_blank" href="' + this['point']['config'][2] + '"><img src="'+this['point']['config'][3]+'" /></a>';
 				}
 			},
 			legend: {
@@ -188,7 +195,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				}
 			},
 			series: [{
-				name: 'Цена',
+				name: 'Цена1',
 				color: 'rgba(223, 83, 83, .5)',
 				data: plugins.cars.chart_data
 			}]
