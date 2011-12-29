@@ -19,7 +19,7 @@
  
 // proxy.php requires Troy's class_http. http://www.troywolf.com/articles
 // Alter the path according to your environment.
-require_once("class_http.php");
+require_once("libs/class_http.php");
  
 $proxy_url = isset($_GET['proxy_url'])?$_GET['proxy_url']:false;
 if (!$proxy_url) {

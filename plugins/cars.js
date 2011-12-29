@@ -26,7 +26,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 		// calculate the pages
 		var pages_array = $(html).find('.pageNumbersInfo').text().split(' '),car_money_type;
 		plugins.cars.maxPages = pages_array[pages_array.length-1];
-		
+		plugins.cars.maxPages = 2;
 		$(html).find('table[width=660]').each(function() {
 			var desc = $(this).find('tbody td[width=510]').html(),
 				car_title = $(this).find('.mmm').text(),
