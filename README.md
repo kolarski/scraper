@@ -18,8 +18,8 @@ Advantages
 
 Dependency
 -----------------
-* Highcharts JS v2.1.9 (included)
-* jQuery (included)
+* [Highcharts JS v2.1.9](http://www.highcharts.com/ "Highcharts JS v2.1.9") (included) 
+* [jQuery](http://www.jquery.com/ "jQuery") (included) 
 * PHP - Using PHP as AJAX proxy regarding "Cross domain origin policy"
 
 
