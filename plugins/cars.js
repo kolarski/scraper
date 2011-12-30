@@ -6,15 +6,15 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 		rub:1,
 		topmenu:1,
 		marka: 'Honda',
-		//model: 'Civic',
+		model: 'Civic',
 		//price1:,
 		//year: 2003,
 		//engine_t:'бензинов',
 		//transmis:'%D0%FA%F7%ED%E0',
 		//location:'',
 		f1: 1,
-		//nup:0, // нови
-		nup:23, // на части
+		nup:0, // нови
+		//nup:23, // на части
 	},
 	el: 'body',
 	cars_data: [],
@@ -23,15 +23,20 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 	probability: {},
 	total: 0,
 	maxPages: 23,
-	process: function(html) {
-		// calculate the pages
-		var pages_array = $(html).find('.pageNumbersInfo').text().split(' '),car_money_type;
-		plugins.cars.maxPages = pages_array[pages_array.length-1];
+	parse: {
+		car_title: function (html){
+			return $(html).find('.mmm').text();
+		}
+	},
+	scrape: function(html){
+		
 		$(html).find('table[width=660]').each(function() {
+			
 			var desc = $(this).find('tbody td[width=510]').html(),
-				car_title = $(this).find('.mmm').text(),
+				car_title = plugins.cars.parse.car_title($(this)); 
 				price = $(this).find('.price').text(),
 				link_pic = $(this).find('tr').eq(2).find('td a');
+			
 			if (desc === null || car_title === null || price === null) return;
 			// manif data
 			car_data = desc.split('<br><br>')[0].split(',');
@@ -84,7 +89,21 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				pic: pic
 			}
 			plugins.cars.cars_data.push(data);
+			//console.log(plugins.cars.cars_data);
 		});
+	},
+	getMaxPages: function(html){
+		var pages_array = $(html).find('.pageNumbersInfo').text().split(' '),car_money_type;
+		return pages_array[pages_array.length-1];
+	},
+	process: function(html) {
+		// calculate the pages
+		
+		
+		plugins.cars.maxPages = plugins.cars.getMaxPages(html);
+		plugins.cars.scrape(html);
+		
+		
 		if(plugins.cars.postVars.f1 <= plugins.cars.maxPages) {
 			plugins.cars.postVars.f1 += 1;
 			$.post(

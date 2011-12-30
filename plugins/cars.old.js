@@ -31,7 +31,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 			var desc = $(this).find('tbody td[width=510]').html(),
 				car_title = $(this).find('.mmm').text(),
 				price = $(this).find('.price').text();
-			
+			console.log( $(this));
 			if (desc === null || car_title === null || price === null) return;
 			
 			// manif data
