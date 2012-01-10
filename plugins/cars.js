@@ -23,138 +23,151 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 	probability: {},
 	total: 0,
 	maxPages: 23,
-	parse: {
-		car_title: function (html){
-			return $(html).find('.mmm').text();
-		}
-	},
-	scrape: function(html){
-		
-		$(html).find('table[width=660]').each(function() {
-			
-			var desc = $(this).find('tbody td[width=510]').html(),
-				car_title = plugins.cars.parse.car_title($(this)); 
-				price = $(this).find('.price').text(),
-				link_pic = $(this).find('tr').eq(2).find('td a');
-			
-			if (desc === null || car_title === null || price === null) return;
-			// manif data
-			car_data = desc.split('<br><br>')[0].split(',');
-			manifacture_date = car_data[0].substring(31).split(' ');
-			
-			// probeg
-			car_km = car_data[1].split(' ')[3];
-			
-			// color
-			if (car_data[2] !== undefined) {
-				car_color = car_data[2].split(' ').splice(3,5).join(' ');
-			} else {
-				car_color = '';
-			}
-			
-			// car location
-			car_data = desc.split('<br><br>')[1].split('<br>Регион: ');
-			car_desc = car_data[0];
-			car_location = car_data[1];
-			
-			//car price
-			price_split = price.split(' ');
-			car_price = price_split.slice(0,price_split.length-1).join('');
-			
-			if(price.indexOf('лв.') == -1) {
-				if (price.indexOf('EUR') !== -1) {
-					car_money_type = 'euro';
-				}
-			} else {
-				car_money_type = 'leva';
-			}
-			link = $(link_pic).attr('href');
-			pic = $(link_pic).find('img').attr('src');
-			//default no-picture
-			if (pic == "http://www.mobile.bg/images/picturess/photo_med1.gif" || pic == 'http://www.mobile.bg/images/picturess/hot_small.gif') {
-				pic = '';
-			}
-			var data = {
-				month: manifacture_date[0],
-				year: parseInt(manifacture_date[1], 10),
-				title: car_title,
-				km: parseInt(car_km, 10),
-				color: car_color,
-				location: car_location,
-				short_desc: car_desc,
-				price: parseInt(car_price, 10),
-				price_currency: car_money_type,
-				scrape_time:  parseInt(new Date().getTime() / 1000, 10),
-				link_pic:  link,
-				pic: pic
-			}
-			plugins.cars.cars_data.push(data);
-			//console.log(plugins.cars.cars_data);
-		});
-	},
-	getMaxPages: function(html){
-		var pages_array = $(html).find('.pageNumbersInfo').text().split(' '),car_money_type;
+	element: '',
+	self: '',
+	html: '',
+	getMaxPages: function(){
+		// return 3;
+		var pages_array = $(self.html).find('.pageNumbersInfo').text().split(' ');
 		return pages_array[pages_array.length-1];
 	},
+	parse: {
+		title: function (){
+			return self.element.find('.mmm').text();
+		},
+		price: function(){
+			var price_split = self.element.find('.price').text().split(' ');
+			return parseInt(price_split.slice(0, price_split.length-1).join(''), 10);
+		},
+		currency: function() {
+			var price_split = self.element.find('.price').text().split(' ');
+			if(price_split.indexOf('лв.') == -1) {
+				if (price_split.indexOf('EUR') !== -1) {
+					return 'euro';
+				}
+			} 
+			return 'leva';
+		},
+		description: function(){
+			return self.element.find('tbody td[width=510]').html();
+		},
+		process_picture: function(src){
+			var no_picture = [
+					"http://www.mobile.bg/images/picturess/photo_med1.gif",
+					"http://www.mobile.bg/images/picturess/hot_small.gif",
+				];
+			return ($.inArray(src, no_picture) !== -1) ? '': src;
+		},
+		thumb_picture: function(){
+			return self.parse.process_picture(self.element.find('tr').eq(2).find('td a').find('img').attr('src'));
+		},
+		medium_picture: function(){
+			return self.parse.process_picture(self.parse.thumb_picture().replace("/med", ""));
+		},
+		big_picture: function(){
+			return self.parse.process_picture(self.parse.thumb_picture().replace("med", "big"));
+		},
+		link_details: function() {
+			return self.element.find('tr').eq(2).find('td a').attr('href');
+		},
+		manifacture_date: function(){
+			var desc = self.parse.description();
+				var car_data = desc.split('<br><br>')[0].split(',');
+			return car_data[0].substring(31).split(' ');
+		},
+		manifacture_year: function(){
+			return parseInt(self.parse.manifacture_date()[1], 10);
+		},
+		manifacture_month: function(){
+			return self.parse.manifacture_date()[0];
+		},
+		km: function(){
+			var desc = self.parse.description(),
+				car_data = desc.split('<br><br>')[0].split(',');
+			return parseInt(car_data[1].split(' ')[3], 10);
+		},
+		color: function(){
+			var desc = self.parse.description(),
+				car_data = desc.split('<br><br>')[0].split(',');
+			return (car_data[2] !== undefined)? car_data[2].split(' ').splice(3,5).join(' '): '';
+		},
+		location: function(){
+			var desc = self.parse.description(),
+				car_data = desc.split('<br><br>')[1].split('<br>Регион: ');
+			return car_data[1];
+		},
+	},
+	breakdown: function() {
+		$(self.html).find('table[width=660]').each(function() {
+			self.element = $(this);
+			if(self.parse.title() === '') return;
+			var data = {
+				year: 			self.parse.manifacture_year(),
+				price:			self.parse.price(),
+				y: 				self.parse.manifacture_year(),
+				x:				self.parse.price(),
+				title: 			self.parse.title(),
+				km: 			(isNaN(self.parse.km()))? 0: self.parse.km(),
+				month: 			self.parse.manifacture_month(),
+				color: 			self.parse.color(),
+				location: 		self.parse.location(),
+				price_currency: self.parse.currency(),
+				scrape_time:  	parseInt(new Date().getTime() / 1000, 10),
+				link:	  		self.parse.link_details(),
+				thumb_picture: 	self.parse.thumb_picture(),
+				medium_picture:	self.parse.medium_picture(),
+				big_picture:	self.parse.big_picture()
+			}
+			self.cars_data.push(data);
+			
+		});
+		// $.map(self.cars_data, function(val,i){val.y = val.km})
+		return self.cars_data;
+	},
+	init: function(html){
+		self = plugins.cars;
+		self.html = html;
+		self.maxPages = self.getMaxPages();
+	},
 	process: function(html) {
-		// calculate the pages
-		
-		
-		plugins.cars.maxPages = plugins.cars.getMaxPages(html);
-		plugins.cars.scrape(html);
-		
-		
-		if(plugins.cars.postVars.f1 <= plugins.cars.maxPages) {
-			plugins.cars.postVars.f1 += 1;
+		plugins.cars.init(html);
+		self.breakdown();
+
+		if(self.postVars.f1 <= self.maxPages) {
+			self.postVars.f1 += 1;
 			$.post(
-				'proxy.php?proxy_url=' + plugins.cars.pageUrl, 
-				plugins.cars.postVars,
-				plugins.cars.process
+				'proxy.php?proxy_url=' + self.pageUrl,
+				self.postVars,
+				self.process
 			);
-			var text = 'Loading page: ' + plugins.cars.postVars.f1 + ' out of ' + plugins.cars.maxPages + ' about <strong>' + plugins.cars.postVars.marka + ' ' + ((plugins.cars.postVars.model)?plugins.cars.postVars.model:'') + '</strong>. Please wait ..';
+			var text = 'Loading page: ' + self.postVars.f1 + ' out of ' + self.maxPages + ' about <strong>' + self.postVars.marka + ' ' + ((self.postVars.model)?self.postVars.model:'') + '</strong>. Please wait ..';
 			$('#container').html(text);
 		} else {
-			plugins.cars.processChartData();
-			plugins.cars.drawChart('container');
-			$('#cars_container').html('<img style="position: absolute;top:0;left:0;" class="imgg" src="" /><div>Cars fetched: ' + plugins.cars.chart_data.length + '<br />Pages scraped: ' + plugins.cars.maxPages  + '<br />Average car price: ' + (plugins.cars.total_price/plugins.cars.chart_data.length).toFixed(2) +'<br />Fucking amazing average: ' + plugins.cars.total.toFixed(2) +'</div>')
-			
+			self.processChartData();
+			self.drawChart('container');
+			$('#cars_container').html('<p class="title"></p><img style="height: 300px" class="imgg" src="" /><div>')
+
 		}
 	},
 	processChartData: function() {
-		var key = '';
-		
-		_.each(plugins.cars.cars_data, function(car, i) {
-			tolerance = 2500;
+		_.each(self.cars_data, function(car, i) {
 			if (car.price_currency !== 'leva') {
 				car.price = car.price * 1.93;
 			}
-			if (isNaN(car.price) === false){
-				plugins.cars.total_price += car.price;
-				key = (car.price > tolerance)?(car.price - (car.price % tolerance)):tolerance;
-				if (typeof plugins.cars.probability[key] === 'undefined') {
-					plugins.cars.probability[key] = 1;
-				} else {
-					plugins.cars.probability[key] += 1;
-				}
-				plugins.cars.chart_data.push([car.price, car.year, car.link_pic, car.pic]);
-			}
 		});
-		
-		_.each(plugins.cars.probability, function(value, key) {
-			plugins.cars.total += ( key * value / plugins.cars.chart_data.length);
-			//console.log(key + ' * ' + value + ' / ' + plugins.cars.chart_data.length);
-		});
-		
 	},
 	drawChart: function(container) {
 		var chart = new Highcharts.Chart({
 			chart: {
-				renderTo: container, 
+				renderTo: container,
 				defaultSeriesType: 'scatter',
 				zoomType: 'xy'
 			},
+			credits: {
+				enabled: false
+			},
 			title: {
-				text: 'Графика за коли марка ' + plugins.cars.postVars.marka + ' ' + plugins.cars.postVars.model
+				text: 'Графика за коли марка ' + self.postVars.marka + ' ' + self.postVars.model
 			},
 			subtitle: {
 				text: 'Александър Коларски'
@@ -182,7 +195,7 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 						return '<a target="_blank" href="' + this['point']['config'][2] + '"><img src="'+this['point']['config'][3]+'" /></a>';
 				}
 			},
-			
+
 			legend: {
 				layout: 'vertical',
 				align: 'left',
@@ -214,33 +227,34 @@ var plugins = $.extend(crower.plugins, {'cars' : {
 				},
 				series: {
 					point: {
-					events: {
-						mouseOver: function(){
-							if (this['config'][3] == ''){
+						events: {
+							mouseOver: function(){
+								if (this['picture'] == ''){
+									$('.imgg').hide().attr('src','');
+								} else {
+									$('.imgg').attr('src', this['big_picture']).show();
+								}
+								$('.title').text(this['title']).show();
+							},
+							mouseOut: function(){
 								$('.imgg').hide().attr('src','');
-							} else {
-								$('.imgg').attr('src', this['config'][3]).show();
+								$('.title').hide().text('');
+							},
+							click: function(){
+								window.open(this['link'],'newtaborsomething');
 							}
 						},
-						mouseOut: function(){
-							$('.imgg').hide().attr('src','');
-						},
-						click: function(){
-							window.open(this['config'][2],'newtaborsomething');
-						}
 					},
-					
-				},
 				}
 			},
 			series: [{
-				name: 'Цена1',
+				name: 'Цена/Година',
 				color: 'rgba(223, 83, 83, .5)',
-				data: plugins.cars.chart_data
+				data: self.cars_data
 			}]
 		});
 	  }
-		
-	
-	
+
+
+
 }});

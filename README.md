@@ -18,9 +18,10 @@ Advantages
 
 Dependency
 -----------------
-* [Highcharts JS v2.1.9](http://www.highcharts.com/ "Highcharts JS v2.1.9") (included) 
 * [jQuery](http://www.jquery.com/ "jQuery") (included) 
 * PHP - Using PHP as AJAX proxy regarding "Cross domain origin policy"
+* [Highcharts JS v2.1.9](http://www.highcharts.com/ "Highcharts JS v2.1.9") (included) (optional)
+* [QUnit testing framework](https://github.com/jquery/qunit "QUnit testing framework") (opional)
 
 
 Simple usage
@@ -42,6 +43,11 @@ var plugins = $.extend(crower.plugins, {'plugin_name' : { // plugin_name is the 
   
 ```
 Put the plugin in plugins folder inder the same name as **plugin_name.js** & execute with **index.php?plugin=plugin_name**
+
+QUnit testing framework integrated
+------------------------------------
+You can now write QUnit test for each plugin. Place the test in the **test** folder with the same plugin name & excute them with **test=1** parameter in the URL.
+
 
 Roadmap
 ---------------
